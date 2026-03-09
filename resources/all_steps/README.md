@@ -3,8 +3,10 @@
 ## step01
 - tables
   - resources/all_steps/step01/tables/step1_channel_signups.csv
+  - resources/all_steps/step01/tables/step1_growth_mau_revenue.csv
 - figures
   - resources/all_steps/step01/figures/step1_channel_signups.png
+  - resources/all_steps/step01/figures/step1_growth_mau_revenue.png
 
 ## step02
 - tables
@@ -63,5 +65,7 @@
   - resources/all_steps/step09/tables/step9_1_final_summary.csv
   - resources/all_steps/step09/tables/step9_3_recommendations.txt
   - resources/all_steps/step09/tables/step9_4_channel_actions.txt
+  - resources/all_steps/step09/tables/step9_5_budget_plan_100pct.csv
 - figures
   - resources/all_steps/step09/figures/step9_2_final_priority_budget.png
+  - resources/all_steps/step09/figures/step9_6_budget_plan_100pct.png

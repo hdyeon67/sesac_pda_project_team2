@@ -62,8 +62,10 @@ def make_dirs(step_num):
 
 def save_step1(ctx):
     df = ctx['step1_df'].copy()
+    growth_df = ctx['growth_df'].copy()
     tdir, fdir = make_dirs(1)
     df.to_csv(tdir / 'step1_channel_signups.csv', index=False, encoding='utf-8-sig')
+    growth_df.to_csv(tdir / 'step1_growth_mau_revenue.csv', index=False, encoding='utf-8-sig')
 
     fig, ax = plt.subplots(figsize=(10, 5))
     bars = ax.bar(df['acquisition_source'], df['signups'], color='#4e79a7')
@@ -75,6 +77,21 @@ def save_step1(ctx):
     ax.tick_params(axis='x', rotation=20)
     plt.tight_layout()
     fig.savefig(fdir / 'step1_channel_signups.png', dpi=180, bbox_inches='tight')
+    plt.close(fig)
+
+    fig, ax1 = plt.subplots(figsize=(10.5, 5.2))
+    ax1.plot(growth_df['month'], growth_df['MAU'], color='#2a9d8f', marker='o', linewidth=2.2, label='MAU')
+    ax1.set_ylabel('MAU', color='#2a9d8f')
+    ax1.tick_params(axis='y', labelcolor='#2a9d8f')
+    ax2 = ax1.twinx()
+    ax2.plot(growth_df['month'], growth_df['total_revenue'], color='#e76f51', marker='s', linewidth=2.2, label='총매출')
+    ax2.set_ylabel('총매출', color='#e76f51')
+    ax2.tick_params(axis='y', labelcolor='#e76f51')
+    ax1.set_title('Step 1B. 3개월 스냅샷 성장 추이 (MAU / 총매출)')
+    ax1.set_xlabel('월')
+    ax1.grid(axis='y', alpha=0.25)
+    plt.tight_layout()
+    fig.savefig(fdir / 'step1_growth_mau_revenue.png', dpi=180, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -341,27 +358,52 @@ def save_step9(ctx):
         )
     (tdir / 'step9_3_recommendations.txt').write_text('\n'.join(rec_lines) + '\n', encoding='utf-8')
 
-    action_lines = ['=== Step 9-4 채널별 액션 추천 (각 3개) ===']
+    action_lines = ['=== Step 9-4 채널별 액션 추천 (목적/기대 시나리오 포함) ===']
+    action_lines.append('[용어 간단 설명]')
+    action_lines.append('- CVR: 유입 대비 유료전환 비율')
+    action_lines.append('- ARPU: 사용자 1인당 평균 매출')
+    action_lines.append('- 리타겟팅: 이탈 가능성이 높은 유저를 다시 타겟해 재노출하는 방식')
+    action_lines.append('- 네거티브 키워드: 비효율 검색어 노출을 차단해 광고비 낭비를 줄이는 키워드')
+    action_lines.append('- A/B 테스트: 두 가지 버전을 병행 실험해 성과가 높은 안을 선택하는 방식')
     for _, r in final.iterrows():
         ch = r['acquisition_source']
         cohort = r['best_cohort']
-        action_lines.append(f'\n[{ch}] 액션 후보')
+        budget = r['recommended_budget_pct']
+        action_lines.append(f"\n[{r['priority']}] {ch} | 권장 예산 {budget:.1f}% | 대표 코호트 {cohort}")
         if ch == 'referral':
-            action_lines.append(f'1. {cohort} 코호트 중심 추천 리워드 상향(A/B): 추천인·피추천인 보상 구조 최적화')
-            action_lines.append('2. 추천 링크/코드 진입 퍼널 단축: 가입-첫결제까지 단계 축소 및 이탈 구간 개선')
-            action_lines.append('3. 고가치 추천인 군 분리 운영: 상위 추천인 대상 시즌성 인센티브 캠페인 운영')
+            action_lines.append('1) 액션: 결제 확정 기반 더블 리워드')
+            action_lines.append('   목적: 가입 수가 아니라 유료전환 수를 늘려 저리스크로 매출 효율을 높인다.')
+            action_lines.append('   기대 시나리오: 추천 가입 후 결제 완료 시점에만 보상이 지급되어, 비용 대비 순매출이 안정적으로 증가한다.')
+            action_lines.append('2) 액션: 추천 진입 퍼널 단축(링크→가입→결제) + A/B 테스트')
+            action_lines.append('   목적: 추천 유입의 이탈 구간을 줄여 전환 속도를 높인다.')
+            action_lines.append('   기대 시나리오: 추천 코드 입력/랜딩/결제 단계 마찰이 줄어 동일 트래픽 대비 CVR이 개선된다.')
+            action_lines.append('3) 액션: 상위 추천인 그룹 인센티브 분리 운영')
+            action_lines.append('   목적: 실제 매출 기여가 큰 추천인 집단에 예산을 집중한다.')
+            action_lines.append('   기대 시나리오: 고성과 추천인 활동량이 증가해 예측 가능한 반복 유입 구조가 강화된다.')
         elif ch == 'youtube':
-            action_lines.append(f'1. {cohort} 페르소나 전용 크리에이티브 확장: 메시지/썸네일/CTA 버전 분리')
-            action_lines.append('2. 영상 소재-랜딩 일치도 개선: 콘텐츠 주제와 랜딩 오퍼를 1:1 매핑')
-            action_lines.append('3. 시청 구간 리타겟팅 운영: 조회완료/중도이탈 세그먼트별 재집행')
+            action_lines.append('1) 액션: 체험 기간 내 조기 결제 프로모션')
+            action_lines.append('   목적: 7일 체험 후 이탈하는 유저를 조기에 유료로 전환한다.')
+            action_lines.append('   기대 시나리오: 체험 종료 전 결제 확정 비율이 올라가며, Q3(체험 이탈) 구간이 축소된다.')
+            action_lines.append('2) 액션: 대표 코호트 맞춤 크리에이티브(메시지/썸네일/CTA) 확장')
+            action_lines.append('   목적: 관심은 있지만 결제 직전에서 머무는 유저의 구매 의사를 자극한다.')
+            action_lines.append('   기대 시나리오: 코호트 적합도가 높은 소재에서 CTR과 랜딩 전환율이 동시에 개선된다.')
+            action_lines.append('3) 액션: 시청구간 기반 리타겟팅(완시청/중도이탈 분리)')
+            action_lines.append('   목적: 의도 수준이 다른 유저를 분리 공략해 전환 효율을 높인다.')
+            action_lines.append('   기대 시나리오: 완시청군은 결제 오퍼, 중도이탈군은 신뢰형 메시지로 재유입되어 전체 전환이 상승한다.')
         elif ch == 'google_ads':
-            action_lines.append(f'1. {cohort} 전환 키워드 묶음 분리: 고의도 키워드 중심 입찰 전략 재구성')
-            action_lines.append('2. 검색어 리포트 기반 네거티브 키워드 확장: 비효율 트래픽 유입 차단')
-            action_lines.append('3. 디바이스/시간대 입찰 조정: 웹 중심 고효율 구간에 예산 집중')
+            action_lines.append('1) 액션: Pro 의도형 키워드 묶음 분리 + 전용 랜딩')
+            action_lines.append('   목적: 결제 가능성이 높은 검색 유입에만 예산을 집중한다.')
+            action_lines.append('   기대 시나리오: 유입량은 다소 줄어도 고의도 트래픽 비중이 올라 CPA 대비 매출 효율이 개선된다.')
+            action_lines.append('2) 액션: 검색어 리포트 기반 네거티브 키워드 확장')
+            action_lines.append('   목적: 비의도/저품질 클릭을 차단해 불필요한 광고비를 줄인다.')
+            action_lines.append('   기대 시나리오: 무효 트래픽이 감소하면서 동일 예산에서 유효 전환 수가 늘어난다.')
+            action_lines.append('3) 액션: 디바이스·시간대 입찰 가중치 조정(웹 중심)')
+            action_lines.append('   목적: 전환율이 높은 구간에 노출을 집중해 단기 효율을 높인다.')
+            action_lines.append('   기대 시나리오: 저성과 시간/디바이스 노출이 줄고, 상위 코호트 중심으로 전환 밀도가 높아진다.')
         else:
-            action_lines.append(f'1. {cohort} 코호트 전용 캠페인 분리 운영')
-            action_lines.append('2. 상위 코호트 유사 오디언스 확장 테스트')
-            action_lines.append('3. 채널 내 TOP5 코호트 순환 운영으로 성과 방어')
+            action_lines.append('1) 액션: 대표 코호트 전용 캠페인 분리 운영')
+            action_lines.append('   목적: 성과가 높은 세그먼트 중심으로 예산을 재배치한다.')
+            action_lines.append('   기대 시나리오: 평균 성과 하락 없이 상위 코호트의 기여도가 확대된다.')
     (tdir / 'step9_4_channel_actions.txt').write_text('\n'.join(action_lines) + '\n', encoding='utf-8')
 
     fig, ax1 = plt.subplots(figsize=(10.5, 5.2))
@@ -382,6 +424,88 @@ def save_step9(ctx):
 
     plt.tight_layout()
     fig.savefig(fdir / 'step9_2_final_priority_budget.png', dpi=180, bbox_inches='tight')
+    plt.close(fig)
+
+    # Step 9-5: 현재 예산 100% 기준 전체 채널 재배분안(제약조건 반영)
+    budget_df = ctx['roi_df'][['acquisition_source', 'final_score_roi']].copy()
+    budget_df = budget_df.rename(columns={'acquisition_source': '채널', 'final_score_roi': 'score'})
+    budget_df = budget_df.sort_values('score', ascending=False).reset_index(drop=True)
+
+    # 집행 우선순위 고정: 1순위 google_ads, 2순위 youtube
+    boost = {ch: 1.0 for ch in budget_df['채널']}
+    preferred_boost = {
+        'google_ads': 1.40,
+        'youtube': 1.25,
+    }
+    for ch, v in preferred_boost.items():
+        if ch in boost:
+            boost[ch] = v
+
+    budget_df['focus_boost'] = budget_df['채널'].map(boost)
+    budget_df['budget_score'] = budget_df['score'] * budget_df['focus_boost']
+
+    # 고정 제약(요청 시나리오):
+    # - organic: 0%
+    # - content_marketing: 2%
+    # - referral: 12%
+    # - instagram_influencer: 8%
+    # - meta_ads: 10%
+    # 나머지(68%)는 google_ads / youtube에만 배분
+    fixed_alloc = {
+        'organic': 0.0,
+        'content_marketing': 2.0,
+        'referral': 12.0,
+        'instagram_influencer': 8.0,
+        'meta_ads': 10.0,
+    }
+    remain_pct = 100.0 - sum(fixed_alloc.values())
+
+    budget_df['budget_pct'] = 0.0
+    mask_fixed = budget_df['채널'].isin(fixed_alloc.keys())
+    mask_variable = ~mask_fixed
+    mask_variable = mask_variable & budget_df['채널'].isin(['google_ads', 'youtube'])
+
+    variable_score_sum = budget_df.loc[mask_variable, 'budget_score'].sum()
+    if variable_score_sum > 0:
+        budget_df.loc[mask_variable, 'budget_pct'] = (
+            budget_df.loc[mask_variable, 'budget_score'] / variable_score_sum * remain_pct
+        )
+
+    for ch, pct in fixed_alloc.items():
+        idx = budget_df.index[budget_df['채널'] == ch]
+        if len(idx) > 0:
+            budget_df.loc[idx[0], 'budget_pct'] = pct
+
+    budget_df['budget_pct'] = budget_df['budget_pct'].round(1)
+    diff = round(100.0 - budget_df['budget_pct'].sum(), 1)
+    for i in budget_df.index:
+        if budget_df.loc[i, '채널'] not in fixed_alloc:
+            budget_df.loc[i, 'budget_pct'] = round(budget_df.loc[i, 'budget_pct'] + diff, 1)
+            break
+
+    budget_plan = budget_df[['채널', 'score', 'focus_boost', 'budget_pct']].copy()
+    budget_plan = budget_plan.sort_values('budget_pct', ascending=False).reset_index(drop=True)
+    budget_plan['tier'] = '테스트'
+    budget_plan.loc[budget_plan.index < 3, 'tier'] = '집중'
+    budget_plan.loc[(budget_plan.index >= 3) & (budget_plan.index < 5), 'tier'] = '유지'
+    budget_plan.loc[budget_plan['채널'] == 'organic', 'tier'] = '제외(0%)'
+    budget_plan.loc[budget_plan['채널'] == 'content_marketing', 'tier'] = '유지(소액)'
+    budget_plan.to_csv(tdir / 'step9_5_budget_plan_100pct.csv', index=False, encoding='utf-8-sig')
+
+    # Step 9-6: 단일 재배분안 시각화
+    plot_df = budget_plan.sort_values('budget_pct', ascending=False).copy()
+    colors = ['#2a9d8f' if i < 3 else '#a8dadc' for i in range(len(plot_df))]
+    fig, ax = plt.subplots(figsize=(12, 5.5))
+    bars = ax.bar(plot_df['채널'], plot_df['budget_pct'], color=colors)
+    for b in bars:
+        ax.text(b.get_x() + b.get_width() / 2, b.get_height(), f'{b.get_height():.1f}%', ha='center', va='bottom', fontsize=8)
+    ax.set_ylabel('예산 비율(%)')
+    ax.set_title('Step 9-6. 현재 예산 100% 기준 채널별 재배분안')
+    ax.set_xlabel('채널')
+    ax.tick_params(axis='x', rotation=20)
+    ax.grid(axis='y', alpha=0.25)
+    plt.tight_layout()
+    fig.savefig(fdir / 'step9_6_budget_plan_100pct.png', dpi=180, bbox_inches='tight')
     plt.close(fig)
 
 
