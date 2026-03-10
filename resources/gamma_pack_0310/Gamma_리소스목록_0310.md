@@ -3,7 +3,7 @@
 ## 분석/근거 문서
 - notebooks/발표자료_프롬프트.md
 - 발표용_분석해설_가이드.md
-- notebooks/회의록_20260309_최종정리.md
+- notebooks/회의록_20260309.md
 
 ## 핵심 표 리소스
 - resources/all_steps/step09/tables/step9_5_budget_plan_100pct.csv
