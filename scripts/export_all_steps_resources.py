@@ -9,6 +9,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib import font_manager
+from matplotlib.ticker import FuncFormatter
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -123,8 +124,19 @@ def save_step3(ctx):
     ax.set_xticklabels(labels, rotation=20)
     ax.set_title('Step 3-1. 채널별 매출액')
     ax.set_ylabel('매출액')
+    ax.ticklabel_format(style='plain', axis='y')
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{int(y):,}'))
+    max_rev = df['revenue'].max()
+    rev_offset = max_rev * 0.02 if max_rev > 0 else 1
     for b in bars:
-        ax.text(b.get_x() + b.get_width() / 2, b.get_height(), f'{b.get_height():,.0f}', ha='center', va='bottom', fontsize=8)
+        ax.text(
+            b.get_x() + b.get_width() / 2,
+            b.get_height() + rev_offset,
+            f'{b.get_height():,.0f}',
+            ha='center',
+            va='bottom',
+            fontsize=8,
+        )
     plt.tight_layout()
     fig.savefig(fdir / 'step3_1_revenue_bar.png', dpi=180, bbox_inches='tight')
     plt.close(fig)
@@ -143,11 +155,36 @@ def save_step3(ctx):
     plt.close(fig)
 
     fig, ax1 = plt.subplots(figsize=(12, 5.5))
-    ax1.bar(x, df['revenue'], color='#4e79a7', alpha=0.75, label='매출액')
+    bars = ax1.bar(
+        x,
+        df['revenue'],
+        color='#4e79a7',
+        alpha=1.0,          # Step 3-1처럼 꽉 찬 막대
+        edgecolor='#4e79a7',
+        linewidth=0.0,
+        label='매출액',
+        zorder=2,
+    )
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels, rotation=20)
     ax1.set_ylabel('매출액', color='#4e79a7')
     ax1.tick_params(axis='y', labelcolor='#4e79a7')
+    ax1.ticklabel_format(style='plain', axis='y')
+    ax1.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{int(y):,}'))
+    ax1.grid(axis='y', alpha=0.25)
+    max_rev = df['revenue'].max()
+    rev_offset = max_rev * 0.03 if max_rev > 0 else 1
+    ax1.set_ylim(0, max_rev * 1.16 if max_rev > 0 else 1)
+    for b in bars:
+        ax1.text(
+            b.get_x() + b.get_width() / 2,
+            b.get_height() + rev_offset,
+            f'{b.get_height():,.0f}',
+            ha='center',
+            va='bottom',
+            fontsize=8,
+            color='#2f4b6e',
+        )
     ax2 = ax1.twinx()
     ax2.plot(x, df['paid_conversion_pct'], color='#e15759', marker='o', linewidth=2.5, label='유료전환율(%)')
     ax2.set_ylabel('유료전환율(%)', color='#e15759')

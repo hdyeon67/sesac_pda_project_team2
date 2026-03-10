@@ -12,7 +12,6 @@
 - `Step5_1_ModelB.ipynb`: 모델B(ROI 제외) 백업 노트북
 - `notebooks/`: 회의록 및 정리 문서
 - `resources/all_steps/`: Step 1~9 결과 표/시각화 리소스
-- `resources/step8_step9/`: Step 8~9 핵심 리소스
 - `scripts/export_all_steps_resources.py`: Step 1~9 리소스 자동 내보내기 스크립트
 - `notebooks/발표자료_프롬프트.md`: 발표자료 생성 프롬프트(최신 Step 반영)
 
