@@ -19,5 +19,6 @@
 
 ## 최종 결과물
 - resources/gamma_pack_0310/스타티 성장 전략 보고서 최종.pptx
+- resources/canva/SQLT_PDA_Project.pptx (03/10 Canva 버전)
 - resources/gamma_pack_0310/Gamma_단일프롬프트_무파일업로드_0310.txt
 - resources/gamma_pack_0310/Gamma_추가슬라이드_비전_기대효과_0310.txt

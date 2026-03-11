@@ -15,12 +15,13 @@
 - `resources/all_steps/`: Step 1~9 결과 표/시각화 리소스
 - `resources/gamma_pack_0310/`: 최종 발표 산출물(PPT/프롬프트/리소스 목록)
   - 최종 발표본: `resources/gamma_pack_0310/스타티 성장 전략 보고서 최종.pptx`
+- `resources/canva/SQLT_PDA_Project.pptx`: 2026-03-10 Canva 편집본 발표 자료
 - `scripts/export_all_steps_resources.py`: Step 1~9 리소스 자동 내보내기 스크립트
 - `notebooks/발표자료_프롬프트.md`: 발표자료 생성 프롬프트(최신 Step 반영)
 
 ## 회의록
 - 날짜 기준 파일명: `회의록_YYYYMMDD.md`
-- 최신 회의록: `notebooks/회의록_20260310.md`
+- 최신 회의록: `notebooks/회의록_20260311.md`
 - 날짜순 인덱스: `notebooks/회의록_목록_날짜순.md`
 
 ## 데이터 관리 정책
